@@ -10,11 +10,11 @@
 		<version>2.0.1.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.ibm</groupId>
+	<groupId>com.fsd</groupId>
 	<artifactId>smceureka</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>eureka</name>
-	<description>smc project for Eureka</description>
+	<description>fsd project for Eureka</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
