@@ -1,49 +1,65 @@
 pipeline {
-  agent none
+  agent any
   environment {
-    DOCKERHUBNAME = "liker163"
+    DOCKERHUBNAME = "zhanghongyu423"
   }
   stages {
-    stage('maven Build') {
-      agent {
-        docker {
-          image 'maven:3-alpine'
-          args '-v /root/.m2:/root/.m2'
-        }
-      }
+    stage('Build') {
       steps {
-        sh 'mvn -B -DskipTests clean package'
+        echo 'build starting...'
+        // bat 'mvn clean'
+        // echo 'maven clean successfully...'
+        // bat 'mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V'
+        // bat 'mvn -B -DskipTests clean package'
+        // echo 'maven install successfully...'
+        // bat 'mvn package'
+        echo 'maven clean and package successfully!'
       }
     }
-
-    stage('docker build & push & run') {
-      agent any
+    stage('Build Docker Image') {
       steps {
-        script {
-          def REMOVE_FLAG = sh(returnStdout: true, script: "docker image ls -q *${DOCKERHUBNAME}/eureka*") != ""
-          echo "REMOVE_FLAG: ${REMOVE_FLAG}"
-          if(REMOVE_FLAG){
-            sh 'docker image rm -f $(docker image ls -q *${DOCKERHUBNAME}/eureka*)'
-          }
-        }
+        echo "Starting building..."
+        // bat 'cd C:\\Users\\HongYuZhang\\.jenkins\\workspace\\erueka_master\\target'
+        // bat 'dir'
+        // bat 'copy "C:\\Users\\HongYuZhang\\.jenkins\\workspace\\erueka_master\\target\\eureka-server-1.0-SNAPSHOT.jar" "C:\\Jenkinstest"'
+        // bat 'copy "C:\\Users\\HongYuZhang\\.jenkins\\workspace\\erueka_master\\target\\eureka-server-1.0-SNAPSHOT.jar" "C:\\jenkinsdocker"'
+        // echo 'copy jar successfully!'
+        // bat 'java -jar C:\\Jenkinstest\\eureka-server-1.0-SNAPSHOT.jar'
+        // echo 'start jar successfully!!!'
 
-        withCredentials([usernamePassword(credentialsId: 'liker163ID', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'docker login -u $USERNAME -p $PASSWORD'
-          sh 'docker image build -t ${DOCKERHUBNAME}/eureka .'
-          sh 'docker push ${DOCKERHUBNAME}/eureka'
-          sh 'docker run -d -p 8761:8761 --network smc-net --name smceureka ${DOCKERHUBNAME}/eureka'
-        }
+        // bat 'docker build -f C:\\Users\\HongYuZhang\\Desktop\\fullstack-eurekaserver\\Dockerfile -t eureka C:\\Users\\HongYuZhang\\Desktop\\fullstack-eurekaserver\\target'
+        // bat 'docker images'
+        // bat 'docker run -d -p 9999:8761 eureka'  
+        // bat 'docker ps' 
+        withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          echo '%USERNAME%'
+          echo '%PASSWORD%'
+          // bat 'docker login -u $USERNAME -p $PASSWORD'
+          bat 'docker login -u %USERNAME% -p %PASSWORD%'
+          echo 'Start building image...'
+          bat 'docker image build -t %DOCKERHUBNAME%/sbaamyeureka .'
+          echo 'Image build successfully!'
+          echo 'Start pushing image to docker hub...'
+          bat 'docker push %DOCKERHUBNAME%/sbaamyeureka'
+          echo 'Image push successfully!'
+          echo 'Start running...'
+          bat 'docker run -d -p 8761:8761 --name sba-eureka %DOCKERHUBNAME%/sbaamyeureka'
+          echo 'docker running successfully!'
+        }   
       }
     }
+  }
+  post {
+    always {
+      echo 'build and deploy finished'
+    }
 
-    stage('clean workspace') {
-      agent any
-      steps {
-        // clean workspace after job finished
-        cleanWs()
-      }
+    failure {
+      echo 'build failed'
+    }
+
+    success {
+      echo 'deploy successfully'
     }
   }
 }
-
-
